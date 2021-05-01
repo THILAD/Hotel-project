@@ -1,0 +1,33 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/body-parser": "^1.19.0",
+    "@types/cors": "^2.8.7",
+    "@types/express": "^4.17.8",
+    "@types/redis": "^2.8.28",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "multer": "^1.4.2",
+    "mysql2": "^2.1.0",
+    "ngx-spinner": "^10.0.1",
+    "redis": "^3.0.2",
+    "sequelize": "^6.3.5"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.2"
+  }
+}
