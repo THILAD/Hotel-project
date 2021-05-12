@@ -5,9 +5,9 @@ import { DatabaseVendor } from "../../Model/vendor.model";
 
 export interface  vendorAttributes extends DatabaseVendor {
     // role: string;
-}
+} 
 //model
-export interface  DatabaseModel extends Model<vendorAttributes>, vendorAttributes {
+export interface  VendorModel extends Model<vendorAttributes>, vendorAttributes {
     prototype: {
         validPassword: (vendorPassword: string) => boolean;
         hashPassword: (vendorPassword: string) => boolean;
@@ -15,7 +15,7 @@ export interface  DatabaseModel extends Model<vendorAttributes>, vendorAttribute
     
 }
 //object
-export class vendorObject extends Model<DatabaseModel, vendorAttributes>{
+export class vendorObject extends Model<VendorModel, vendorAttributes>{
     prototype: {
         validPassword: (vendorPassword: string) => boolean;
         hashPassword: (vendorPassword: string) => string;
@@ -23,12 +23,12 @@ export class vendorObject extends Model<DatabaseModel, vendorAttributes>{
 }
 // static object
 export type VendorStatic = typeof Model & {
-    new(values?: object, options?: BuildOptions): DatabaseModel;
+    new(values?: object, options?: BuildOptions): VendorModel;
 }
 
 //entity factory
 export const vendorFactory = (name: string, sequelize: Sequelize): VendorStatic => {
-    const attributes: ModelAttributes<DatabaseModel> = {
+    const attributes: ModelAttributes<VendorModel> = {
         vendor_id: { 
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -78,16 +78,16 @@ export const vendorFactory = (name: string, sequelize: Sequelize): VendorStatic 
             type: DataTypes.STRING, defaultValue: new Date().toJSON()
         },
        
-    } as ModelAttributes<DatabaseModel>;
+    } as ModelAttributes<VendorModel>;
 
     let x = sequelize.define(name, attributes, { tableName: name, freezeTableName: true });
 
-    x.prototype.hashPassword = function (password: string): string {
-        if (!password) return '';
-        return this.password = bcryptjs.hashSync(password, bcryptjs.genSaltSync())
+    x.prototype.hashPassword = function (vendor_password: string): string {
+        if (!vendor_password) return '';
+        return this.vendor_password = bcryptjs.hashSync(vendor_password, bcryptjs.genSaltSync())
     }
-    x.prototype.validPassword = function (password: string): boolean {
-        const str = password + this.vendor_username + this.vendor_phonenumber;
+    x.prototype.validPassword = function (vendor_password: string): boolean {
+        const str = vendor_password + this.vendor_name + this.vendor_phonenumber;
         console.log('valid password', str, "length", str.length);
         console.log('valid password', this.vendor_password);
         if (bcryptjs.compareSync(str, this.vendor_password)) return true;
@@ -95,7 +95,7 @@ export const vendorFactory = (name: string, sequelize: Sequelize): VendorStatic 
     }
     x.beforeCreate(async (user, options) => {
         if (user.changed('vendor_password')) {
-            if (user.vendor_password && user.vendor_name && user.vendor_phonenumber) {
+            if (user.vendor_password && user.vendor_name&& user.vendor_phonenumber) {
                 const str = user.vendor_password + user.vendor_name + user.vendor_phonenumber;
                 console.log('create password', str, "length", str.length);
                 return bcryptjs.hash(str, bcryptjs.genSaltSync())

@@ -1,15 +1,15 @@
 //import * as jwt from 'jsonwebtoken';
 const jwt = require('jsonwebtoken');
-import { DatabaseModel } from '../api/entities/vendorEntity';
+import { VendorModel } from '../api/entities/vendorEntity';
 import { Request } from 'express';
-export class APIService{
+export class APIVendorService{
     static okRes(data:any,message:string='OK',status:number=1){
         return {status,message,data};
     }
     static errRes(data:any,message:string='Error',status:number=0){
         return {status,message,data};
     }
-    static createToken(data:DatabaseModel){
+    static createToken(data:VendorModel){
         try {
             return jwt.sign({
                 data,
@@ -23,8 +23,8 @@ export class APIService{
     }
     static validateToken(k:string){
         try {
-            const data = jwt.verify(k,Keys.jwtKey) as DatabaseModel;
-            const token = APIService.createToken(data);
+            const data = jwt.verify(k,Keys.jwtKey) as VendorModel;
+            const token = APIVendorService.createToken(data);
             if(token) return token;
             else return '';
         } catch (error) {
@@ -36,9 +36,9 @@ export class APIService{
         try {
             const o = jwt.decode(k);
             if (o) {
-                const data = o['data'] as DatabaseModel;
-                const user = req.headers['_user'] as unknown as DatabaseModel;
-                const vendor_id = req.body.id;
+                const data = o['data'] as VendorModel;
+                const user = req.headers['_user'] as unknown as VendorModel;
+                const vendor_id = req.body.vendor_id;
                 if (user.vendor_id === data.vendor_id && user.vendor_id === vendor_id && user.vendor_id && data.vendor_id && vendor_id) {
                     return true;
                 } else {
@@ -58,6 +58,19 @@ export class APIService{
     }
     static clone(data:any){
         return JSON.parse(JSON.stringify(data))
+    }
+    static getCurrentUser(k: string) {
+        try {
+            const o = jwt.decode(k);
+            console.log(JSON.stringify(o));
+
+            if (o) {
+                return o['data'];
+            }
+        } catch (error) {
+            console.log(error);
+        }
+        return null;
     }
     
 }

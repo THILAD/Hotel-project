@@ -1,6 +1,6 @@
 //import * as jwt from 'jsonwebtoken';
 const jwt = require('jsonwebtoken');
-import { DatabaseModel } from '../api/entities/vendorEntity';
+import { VendorModel } from '../api/entities/vendorEntity';
 import { Request } from 'express';
 export class APIService{
     static okRes(data:any,message:string='OK',status:number=1){
@@ -9,7 +9,7 @@ export class APIService{
     static errRes(data:any,message:string='Error',status:number=0){
         return {status,message,data};
     }
-    static createToken(data:DatabaseModel){
+    static createToken(data:VendorModel){
         try {
             return jwt.sign({
                 data,
@@ -23,7 +23,7 @@ export class APIService{
     }
     static validateToken(k:string){
         try {
-            const data = jwt.verify(k,Keys.jwtKey) as DatabaseModel;
+            const data = jwt.verify(k,Keys.jwtKey) as VendorModel;
             const token = APIService.createToken(data);
             if(token) return token;
             else return '';
@@ -36,8 +36,8 @@ export class APIService{
         try {
             const o = jwt.decode(k);
             if (o) {
-                const data = o['data'] as DatabaseModel;
-                const user = req.headers['_user'] as unknown as DatabaseModel;
+                const data = o['data'] as VendorModel;
+                const user = req.headers['_user'] as unknown as VendorModel;
                 const id = req.body.vendor_id;
                 if (user.vendor_id === data.vendor_id && user.vendor_id === id && user.vendor_id && data.vendor_id && id) {
                     return true;

@@ -1,46 +1,41 @@
 import { Request, Response, NextFunction, Application, response } from "express";
 import { Sequelize } from "sequelize/types";
-import { DatabaseVendor, Login,  } from "../../../Model/vendor.model";
-import { APIService } from "../../../services/api.service";
+import { DatabaseVendor, } from "../../../Model/vendor.model";
 import { dbconnection, UserEntity } from "../../entities/index";
-import { DatabaseModel } from "../../entities/vendorEntity";
-import { API_VendorService } from "../../service/api.services.vendor";
-import { ApiUserRes } from "../../service/reqeust/createUserVendor";
+import { VendorModel } from "../../entities/vendorEntity";
+import { APIVendorService } from "../../../services/vendor.service";
+import { AuthCheckLogin } from "../auth/vendor-auth";
+// import { ApiUserRes } from "../../service/reqeust/createdata";
 
 export class VendorController {
     app: Application;
     dbconnection: Sequelize;
     constructor(app: Application) {
         this.app = app;
-        // sync
-        // UserEntity.sync();
-        //USERLIST
-        app.get('', VendorController.getserverrunning)
-        app.get('/api/vendor', VendorController.getVendorList)
-        app.post('/api/vendor', VendorController.GetVendorDetails)
-        // .patch('/vendor/update', VendorController.UpdateVendor)
-        app.put('/api/vendor', VendorController.CresateVendorUser)
-
+        app.get('', VendorController.getserverrunning) // passed 
+        app.put('/api/vendor', VendorController.CresateVendorUser)  //passed create user
+        app.get('/api/vendor', VendorController.getVendorList) //passed list all u ser
+        app.post('/api/vendor', AuthCheckLogin.checkToken, VendorController.GetVendorDetails) //passed get user by id 
+        app.patch('/api/vendor', VendorController.UpdateVendor) //passed update user 
+        app.delete('/api/vendor', VendorController.DeleteVendor)  //passed delete user 
     }
 
     static getserverrunning(req: Request, res: Response) {
-        res.send('server runing ')
+        res.send('server runing  ')
     }
     // get all user list passed thonthilad
     static getVendorList(req: Request, res: Response) {
-
         try {
             const limit = req.query.limit ? Number(req.query.limit) : 10;
             const skip = req.query.limit ? Number(req.query.limit) : 0;
             UserEntity.findAll({ limit, offset: skip * limit }).then(r => {
-                const data = r as unknown 
-                // res.send(ApiUserRes.successRegister(r))
+                const data = r 
                 const successResponse = {
                  
                     command: "vendorList",
                     messages: 'vendorList successfully',
                     status: 1,
-                    userVendor: data
+                    data: data
                 };
                 res.send(successResponse);
                 return response.status(200).send(successResponse)
@@ -51,17 +46,17 @@ export class VendorController {
                 command: "vendorList",
                 messages: 'something wrong',
                 status: 0,
-                userVendor: error
+                data: error
             };
-            res.send(error)
-            return response.status(404).send(error)
+            res.send(successResponse)
+            return response.status(404).send(successResponse)
 
         }
     }
 
     // get user detail by id
     static GetVendorDetails(req: Request, res: Response) {
-        const data= req.body as DatabaseModel
+        const data= req.body as VendorModel
         console.log('tets------------------tes---',data);
         console.log('tets------------------tes---',data.vendor_id);
 
@@ -72,45 +67,42 @@ export class VendorController {
             console.log('----------test do you know id--------------',vendor_id);
             
             UserEntity.findByPk(vendor_id).then(r => {
-                const data = r as  DatabaseModel
+                const data = r as  VendorModel
                 const successResponse= {
                     messages: 'vendorDetail successfully',
                     status: 1,
-                    userVendor: data
+                    data: data
                 };
                 console.log('-----------seucces------------',data.vendor_phonenumber);
                 
                 if (data) {
-                    const u = API_VendorService.clone(data) as DatabaseModel;
-                    
+                    const u = APIVendorService.clone(data) as VendorModel;
                     delete u.vendor_password;
                     return res.send(successResponse);
                 } else {
                     const errorResponse= {
                         messages: 'vendorDetail somthing wrong',
                         status:0,
-                        userVendor: data
+                        data: data
                     };
                     res.send(({errorResponse}));
                 }
                 // const token = APIService.requestToken(req);
             }).catch(error => {
                 const errorRes = {
-                    code: 0,
-                    command: "vendorDetail",
+                  
                     messages: 'something wrong',
-                    status: "failed",
-                    userVendor: error
+                    status: 0,
+                    data: error
                 };
                 res.send(errorRes);
             })
         } catch (error) {
             const errorRes = {
-                code: 0,
-                command: "vendorDetail",
+              
                 messages: 'something wrong',
-                status: "failed",
-                userVendor: error
+                status: 0,
+                data: error
             };
             res.send(errorRes);
         }
@@ -129,16 +121,16 @@ export class VendorController {
                     {
                         vendor_phonenumber: user.vendor_phonenumber
                     }, transaction
-                }).then(async r => {
+                }).then
+                (async r => {
                     // console.log(r, 'You already have phone number');
                     if (r) {
                         await transaction.rollback();
                         const errorRes= {
-                            code: 3,
-                            command: "vendorRegister",
+                       
                             messages: 'You already have phone number',
-                            status: "failed",
-                            userVendor: r
+                            status: 3,
+                            data: r
                         };
                         res.send(errorRes);
                     }
@@ -152,22 +144,20 @@ export class VendorController {
 
                         UserEntity.create<any>(addData).then(resData => {
                             const successResponse = {
-                                code: 1,
-                                command: "vendorRegister",
+                             
                                 messages: 'vendorRegister successfully',
-                                status: "success",
-                                userVendor: resData
+                                status: 1,
+                                data: resData
                             };
                             console.log('------ress=------',resData);
                             
                             res.send(successResponse);
                         }).catch(e => {
                             const errorRes= {
-                                code: 3,
-                                command: "vendorRegister",
+                             
                                 messages: 'somthing went wrong',
-                                status: "failed",
-                                userVendor: e
+                                status: 0,
+                                data: e
                             };
                             console.log('eorrrrorror',e);
                             
@@ -178,11 +168,10 @@ export class VendorController {
             });
         } catch (error) {
             const errorRes = {
-                code: 3,
-                command: "vendorDetail",
+           
                 messages: 'somthing went wrong',
-                status: "failed",
-                userVendor: error
+                status: 0,
+                data: error
             };
             console.log('eorrrrorror',error);
 
@@ -193,80 +182,79 @@ export class VendorController {
 
     //update user
     static UpdateVendor(req: Request, res: Response) {
+        const data= req.body as VendorModel
+        console.log('tets------------------allll---',data);
+        console.log('tets------------------data comming id--',data.vendor_id);
 
         try {
-            const id = req.body.id + '';
+            const id = req.body.vendor_id + '';
             const users = req.body as DatabaseVendor;
+            console.log('--------------id----------------',id);
+            console.log('--------------data----------------',users);
+
+            
             UserEntity.findByPk(id).then(async r => {
                 console.log('okokookooko', r);
                 if (r) {
-                    r['vendor_role'] = users.vendor_role,
                         r['vendor_name'] = users.vendor_name,
                         r['vendor_phonenumber'] = users.vendor_phonenumber
-                    r['vendor_password'] = users.vendor_password,
+                        r['vendor_password'] = users.vendor_password,
                         res.send({
                             status: 1,
                             data: await r.save(),
-                            message: 'update OK'
+                            messages: 'update user successfully',
+
 
                         });
 
-                    const successResponse={
-                        code: 1,
-                        command: "vendorRegister",
-                        messages: 'update user successfully',
-                        status: "success",
-                        userVendor: r
-                    };
-                    res.send(successResponse);
+                    // const successResponse={
+                    //     messages: 'update user successfully',
+                    //     status: 1,
+                    //     data: await r.save(),
+                    // };
+                    // res.send(successResponse);
                 }
             }).catch(e => {
                 const errorRes = {
-                    code: 3,
-                    command: "vendorRegister",
                     messages: 'somthing went wrong',
-                    status: "failed",
-                    userVendor: e
+                    status: 0,
+                    data: e
                 };
                 res.send(errorRes);
                 console.log('eorror data ', e);
             });
         } catch (e) {
             const errorRes = {
-                code: 3,
-                command: "vendorRegister",
                 messages: 'somthing went wrong',
-                status: "failed",
-                userVendor: e
+                status: 0,
+                data: e
             };
             res.send(errorRes);
             console.log('eorror data ', e);
         }
     }
     static DeleteVendor(req: Request, res: Response) {
-        let id = req.body.id + '';
+        let id = req.body.vendor_id;
+        console.log('=================id-------------',id);
+        
         UserEntity.findByPk(id).then(async r => {
             let x = r.destroy();
-
             const successResponse = {
-                code: 3,
-                command: "vendorRegister",
                 messages: 'delete successful',
-                status: "success",
-                userVendor: r
+                status: 1,
+                data: r
             };
             res.send(successResponse)
         }).catch(e => {
             const errorRes = {
-                code: 3,
-                command: "vendorRegister",
                 messages: 'somthing went wrong',
-                status: "failed",
-                userVendor: e
+                status: 0,
+                data: e
             };
             res.send(errorRes)
 
         })
     }
+
 
 }

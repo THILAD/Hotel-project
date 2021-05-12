@@ -1,11 +1,4 @@
-// export class VendorModel{
-//     command:string
-//     code:number;
-//     messages:string;
-//     status:string; 
-//     // jwt:string
-//     userVendor:Data
-// }
+
 export class Data{
     vendor_id:string
     vendor_role:string
@@ -38,33 +31,8 @@ export class DatabaseVendor{
     UpdateAt:string
     isActive:string
     last_login:string
-    validPassword:(password:string)=>boolean;
-    hashPassword:(password:string)=>boolean;
+    validPassword:(vendor_password:string)=>boolean;
+    hashPassword:(vendor_password:string)=>boolean;
 }
 
-export class Login{
-    vendor_phonenumber:string
-    vendor_password:string
-}
-export class Resgiter{
-    jwt:string
-    commad:string
-    vendor_phonenumber:string
-    vendor_password:string
-    vendor_password_confirm:string
-    
-}
-export class changePassword{
-    vendor_id:string
-    jwt:string
-    commad:string
-    phonenumber:string
-    password_old:string
-    password_new:string
-}
-export class ForgotPassword{
-    vendor_id:string
-    jwt:string
-    commad:string
-    phonenumber:string
-}
+
